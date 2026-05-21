@@ -229,7 +229,9 @@ class WorkflowEngine {
           if (counter > this.nodeIdCounter) this.nodeIdCounter = counter;
         }
       }
-      this.connections = data.connections || [];
+      this.connections = (data.connections || []).filter(
+        c => this.nodes.has(c.from) && this.nodes.has(c.to) && c.from !== c.to
+      );
       this.totalTokens = Array.from(this.nodes.values()).reduce((sum, n) => sum + (n.tokens || 0), 0);
       return true;
     } catch {

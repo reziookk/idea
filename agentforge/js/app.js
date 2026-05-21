@@ -198,6 +198,7 @@ function renderNode(node) {
   el.style.top = node.y + 'px';
 
   const agent = AGENT_TYPES[node.type];
+  if (!agent) return; // guard against unknown node types
   const statusColors = { idle: '#8888a8', running: '#6c5ce7', completed: '#00d2a0', error: '#ff5555' };
   const statusLabels = { idle: 'IDLE', running: 'RUN', completed: 'DONE', error: 'ERR' };
 
@@ -368,6 +369,7 @@ function importWorkflow() {
       if (success) {
         document.querySelectorAll('.wf-node').forEach(el => el.remove());
         for (const [id, node] of engine.nodes) {
+          if (!AGENT_TYPES[node.type]) continue; // skip unknown node types
           renderNode(node);
           const textarea = document.querySelector(`.prompt-text[data-node-id="${id}"]`);
           if (textarea) textarea.value = node.prompt || '';
