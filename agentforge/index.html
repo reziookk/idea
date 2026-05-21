@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentForge — AI Agent Workflow Builder</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AgentForge</span>
+      </div>
+      <span class="badge">Powered by Xiaomi MiMo</span>
+    </div>
+    <div class="header-right">
+      <div class="token-counter">
+        <span class="token-label">Tokens Used</span>
+        <span class="token-value" id="tokenCount">0</span>
+      </div>
+      <button class="btn btn-primary" id="btnConnect" onclick="toggleConnection()">
+        <span class="btn-dot"></span> Connect MiMo
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Agent Nodes</h3>
+        <div class="node-palette">
+          <div class="node-item" data-type="planner" draggable="true">
+            <div class="node-icon planner">📋</div>
+            <span>Planner</span>
+          </div>
+          <div class="node-item" data-type="researcher" draggable="true">
+            <div class="node-icon researcher">🔍</div>
+            <span>Researcher</span>
+          </div>
+          <div class="node-item" data-type="coder" draggable="true">
+            <div class="node-icon coder">💻</div>
+            <span>Coder</span>
+          </div>
+          <div class="node-item" data-type="reviewer" draggable="true">
+            <div class="node-icon reviewer">🛡️</div>
+            <span>Reviewer</span>
+          </div>
+          <div class="node-item" data-type="executor" draggable="true">
+            <div class="node-icon executor">⚙️</div>
+            <span>Executor</span>
+          </div>
+          <div class="node-item" data-type="tts" draggable="true">
+            <div class="node-icon tts">🔊</div>
+            <span>TTS Output</span>
+          </div>
+          <div class="node-item" data-type="vision" draggable="true">
+            <div class="node-icon vision">👁️</div>
+            <span>Vision</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">MiMo Models</h3>
+        <div class="model-list">
+          <label class="model-option">
+            <input type="radio" name="model" value="mimo-v2.5-pro" checked>
+            <span class="model-name">MiMo V2.5 Pro</span>
+            <span class="model-tag">Reasoning</span>
+          </label>
+          <label class="model-option">
+            <input type="radio" name="model" value="mimo-v2.5-omni">
+            <span class="model-name">MiMo V2.5 Omni</span>
+            <span class="model-tag">Multimodal</span>
+          </label>
+          <label class="model-option">
+            <input type="radio" name="model" value="mimo-v2.5-tts">
+            <span class="model-name">MiMo V2.5 TTS</span>
+            <span class="model-tag">Voice</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Settings</h3>
+        <div class="setting-group">
+          <label>API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-xxxxxxxx" class="input">
+        </div>
+        <div class="setting-group">
+          <label>Temperature</label>
+          <input type="range" id="temperature" min="0" max="100" value="30" class="range">
+          <span class="range-value" id="tempValue">0.3</span>
+        </div>
+        <div class="setting-group">
+          <label>Max Tokens</label>
+          <select id="maxTokens" class="input">
+            <option value="2048">2,048</option>
+            <option value="4096" selected>4,096</option>
+            <option value="8192">8,192</option>
+            <option value="16384">16,384</option>
+          </select>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center: Canvas -->
+    <main class="canvas-area">
+      <div class="canvas-toolbar">
+        <button class="toolbar-btn" onclick="clearCanvas()" title="Clear">🗑️ Clear</button>
+        <button class="toolbar-btn" onclick="addDefaultWorkflow()" title="Default Workflow">📌 Template</button>
+        <button class="toolbar-btn" onclick="exportWorkflow()" title="Export">📤 Export</button>
+        <button class="toolbar-btn" onclick="importWorkflow()" title="Import">📥 Import</button>
+        <div class="toolbar-spacer"></div>
+        <button class="btn btn-run" id="btnRun" onclick="runWorkflow()">
+          ▶ Run Workflow
+        </button>
+        <button class="btn btn-stop" id="btnStop" onclick="stopWorkflow()" style="display:none">
+          ■ Stop
+        </button>
+      </div>
+      <div class="canvas" id="canvas">
+        <div class="canvas-grid"></div>
+        <div class="canvas-hint" id="canvasHint">
+          <p>Drag agent nodes from the sidebar or click <strong>Template</strong> to load a default workflow</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Panel: Logs -->
+    <aside class="log-panel">
+      <div class="log-header">
+        <h3>Execution Log</h3>
+        <button class="toolbar-btn" onclick="clearLogs()" title="Clear logs">🗑️</button>
+      </div>
+      <div class="log-body" id="logBody">
+        <div class="log-entry info">
+          <span class="log-time">--:--:--</span>
+          <span class="log-msg">AgentForge ready. Connect MiMo API to begin.</span>
+        </div>
+      </div>
+      <div class="prompt-area">
+        <input type="text" id="promptInput" placeholder="Enter task for agents..." class="prompt-input">
+        <button class="btn btn-primary btn-sm" onclick="submitPrompt()">Send</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Connection Modal -->
+  <div class="modal-overlay" id="connectModal" style="display:none">
+    <div class="modal">
+      <h2>Connect to Xiaomi MiMo API</h2>
+      <p>Enter your MiMo API key from <a href="https://platform.xiaomimimo.com" target="_blank">platform.xiaomimimo.com</a></p>
+      <div class="setting-group">
+        <label>API Key</label>
+        <input type="password" id="modalApiKey" placeholder="sk-xxxxxxxx" class="input">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="connectApi()">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/workflow.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
